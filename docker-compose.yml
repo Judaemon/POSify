@@ -1,6 +1,6 @@
 services:
     laravel.test:
-        container_name: bpos
+        container_name: POSify
         build:
             context: ./docker/8.3
             dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
             - mysql
             - redis
     mysql:
-        container_name: bpos-mysql
+        container_name: POSify-mysql
         image: 'mysql/mysql-server:8.0'
         # ports:
         #     - '${FORWARD_DB_PORT:-3306}:3306'
@@ -53,7 +53,7 @@ services:
             retries: 3
             timeout: 5s
     redis:
-        container_name: bpos-redis
+        container_name: POSify-redis
         image: 'redis:alpine'
         # ports:
         #     - '${FORWARD_REDIS_PORT:-6379}:6379'

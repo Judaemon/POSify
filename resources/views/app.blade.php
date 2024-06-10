@@ -12,7 +12,7 @@
 
         <!-- Scripts -->
         @viteReactRefresh
-        @vite(['resources/js/main.tsx'])
+        @vite(['resources/js/app.tsx'])
     </head>
     <body class="font-sans antialiased">
         <div id="root"></div>

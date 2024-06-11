@@ -26,6 +26,7 @@ services:
         depends_on:
             - mysql
             - redis
+            - selenium
     mysql:
         container_name: POSify-mysql
         image: 'mysql/mysql-server:8.0'
@@ -69,6 +70,18 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+    selenium:
+        container_name: POSify-selenium
+        image: 'selenium/standalone-chrome'
+        ports:
+            - '4444:4444'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        volumes:
+            - '/dev/shm:/dev/shm'
+        networks:
+            # - sail
+            - nginx_proxy-network
 networks:
     nginx_proxy-network:
         external: true

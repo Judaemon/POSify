@@ -23,6 +23,7 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.45.0",
         "react-sweet-state": "^2.7.1"
     }
 }

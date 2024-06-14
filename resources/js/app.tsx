@@ -9,7 +9,7 @@ import { useAuth } from './Hooks/useAuth';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-import type { LoaderFunctionArgs } from "react-router-dom";
+import type { LoaderFunctionArgs } from 'react-router-dom';
 import {
   Form,
   Link,
@@ -22,13 +22,13 @@ import {
   useLocation,
   useNavigation,
   useRouteLoaderData,
-} from "react-router-dom";
-import { fakeAuthProvider } from "./auth";
+} from 'react-router-dom';
+import { fakeAuthProvider } from './auth';
 
 const router = createBrowserRouter([
   {
-    id: "root",
-    path: "/",
+    id: 'root',
+    path: '/',
     loader() {
       // Our root route always provides the user, if logged in
       return { user: fakeAuthProvider.username };
@@ -40,24 +40,24 @@ const router = createBrowserRouter([
         Component: PublicPage,
       },
       {
-        path: "login",
-        action: loginAction,
-        loader: loginLoader,
-        Component: LoginPage,
+        path: 'login',
+        // action: loginAction,
+        // loader: loginLoader,
+        Component: LoginForm,
       },
       {
-        path: "protected",
+        path: 'protected',
         loader: protectedLoader,
         Component: ProtectedPage,
       },
     ],
   },
   {
-    path: "/logout",
+    path: '/logout',
     async action() {
       // We signout in a "resource route" that we can hit from a fetcher.Form
       await fakeAuthProvider.signout();
-      return redirect("/");
+      return redirect('/');
     },
   },
 ]);
@@ -110,7 +110,7 @@ function Layout() {
 
 function AuthStatus() {
   // Get our logged in user, if they exist, from the root route loader data
-  let { user } = useRouteLoaderData("root") as { user: string | null };
+  let { user } = useRouteLoaderData('root') as { user: string | null };
   let fetcher = useFetcher();
 
   if (!user) {
@@ -124,7 +124,7 @@ function AuthStatus() {
       <p>Welcome {user}!</p>
       <fetcher.Form method="post" action="/logout">
         <button type="submit" disabled={isLoggingOut}>
-          {isLoggingOut ? "Signing out..." : "Sign out"}
+          {isLoggingOut ? 'Signing out...' : 'Sign out'}
         </button>
       </fetcher.Form>
     </div>
@@ -134,13 +134,13 @@ function AuthStatus() {
 async function loginAction({ request }: LoaderFunctionArgs) {
   let formData = await request.formData();
   console.log('formData', formData);
-  
-  let username = formData.get("username") as string | null;
+
+  let username = formData.get('username') as string | null;
 
   // Validate our form inputs and return validation errors via useActionData()
   if (!username) {
     return {
-      error: "You must provide a username to log in",
+      error: 'You must provide a username to log in',
     };
   }
 
@@ -152,50 +152,50 @@ async function loginAction({ request }: LoaderFunctionArgs) {
     // username/password combinations - just like validating the inputs
     // above
     return {
-      error: "Invalid login attempt",
+      error: 'Invalid login attempt',
     };
   }
 
-  let redirectTo = formData.get("redirectTo") as string | null;
-  return redirect(redirectTo || "/");
+  let redirectTo = formData.get('redirectTo') as string | null;
+  return redirect(redirectTo || '/');
 }
 
 async function loginLoader() {
   if (fakeAuthProvider.isAuthenticated) {
-    return redirect("/");
+    return redirect('/');
   }
   return null;
 }
 
-function LoginPage() {
-  let location = useLocation();
-  let params = new URLSearchParams(location.search);
-  let from = params.get("from") || "/";
+// function LoginPage() {
+//   let location = useLocation();
+//   let params = new URLSearchParams(location.search);
+//   let from = params.get('from') || '/';
 
-  let navigation = useNavigation();
-  let isLoggingIn = navigation.formData?.get("username") != null;
+//   let navigation = useNavigation();
+//   let isLoggingIn = navigation.formData?.get('username') != null;
 
-  let actionData = useActionData() as { error: string } | undefined;
+//   let actionData = useActionData() as { error: string } | undefined;
 
-  return (
-    <div>
-      <p>You must log in to view the page at {from}</p>
+//   return (
+//     <div>
+//       <p>You must log in to view the page at {from}</p>
 
-      <Form method="post" replace>
-        <input type="hidden" name="redirectTo" value={from} />
-        <label>
-          Username: <input name="username" />
-        </label>{" "}
-        <button type="submit" disabled={isLoggingIn}>
-          {isLoggingIn ? "Logging in..." : "Login"}
-        </button>
-        {actionData && actionData.error ? (
-          <p style={{ color: "red" }}>{actionData.error}</p>
-        ) : null}
-      </Form>
-    </div>
-  );
-}
+//       <Form method="post" replace>
+//         <input type="hidden" name="redirectTo" value={from} />
+//         <label>
+//           Username: <input name="username" />
+//         </label>{' '}
+//         <button type="submit" disabled={isLoggingIn}>
+//           {isLoggingIn ? 'Logging in...' : 'Login'}
+//         </button>
+//         {actionData && actionData.error ? (
+//           <p style={{ color: 'red' }}>{actionData.error}</p>
+//         ) : null}
+//       </Form>
+//     </div>
+//   );
+// }
 
 function PublicPage() {
   return <h3>Public</h3>;
@@ -207,8 +207,8 @@ function protectedLoader({ request }: LoaderFunctionArgs) {
   // to this page upon successful authentication
   if (!fakeAuthProvider.isAuthenticated) {
     let params = new URLSearchParams();
-    params.set("from", new URL(request.url).pathname);
-    return redirect("/login?" + params.toString());
+    params.set('from', new URL(request.url).pathname);
+    return redirect('/login?' + params.toString());
   }
   return null;
 }
@@ -217,11 +217,22 @@ function ProtectedPage() {
   return <h3>Protected</h3>;
 }
 
-
 // export default App;
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import LoginForm from './Components/Auth/LoginForm';
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </StrictMode>
 );

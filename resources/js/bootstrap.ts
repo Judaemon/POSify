@@ -32,3 +32,35 @@ export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 };
 
 // End of zustand setup
+
+window.axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    switch (error.response.status) {
+      case 401: // Not logged in
+        console.log('Not logged in');
+        redirect('/login');
+
+        Promise.reject(error);
+
+        break;
+      case 419: // Session expired
+        // Bounce the user to the login screen with a redirect back
+        // window.location.href = '/login?redirectTo=' + encodeURIComponent(window.location.pathname);
+        // window.location.href = '/session-expired';
+        // redirect('/');
+
+        break;
+      case 503: // Down for maintenance
+        // Bounce the user to the login screen with a redirect back
+        // window.location.reload();
+        break;
+      case 500:
+        alert('Oops, something went wrong!  The team have been notified.');
+        break;
+      default:
+        // Allow individual requests to handle other errors
+        return Promise.reject(error);
+    }
+  }
+);

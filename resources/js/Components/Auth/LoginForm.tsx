@@ -1,34 +1,49 @@
-import { UseMutationResult, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  UseMutationResult,
+  useMutation,
+} from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import { useLocation } from 'react-router';
-import { SampleUsers } from '../SampleComponent';
+import { useAuth } from '@/Hooks/useAuth';
 
-type LoginResponse = {
-  // Define the expected response type from the login endpoint
+type LoginRequestResponse = {
   message: string;
 };
 
-type LoginError = {
-  // Define the expected error type from the login endpoint
+type LoginRequestError = {
   message: string;
 };
 
-const loginUser = async (): Promise<LoginResponse> => {
-  const response = await axios.post('/login', {
-    username: 'test@gmail.com',
-    password: '12312312312',
-  });
+interface LoginRequestCredentials {
+  email: string;
+  password: string;
+}
+
+const loginUser = async (
+  loginCredentials: LoginRequestCredentials
+): Promise<LoginRequestResponse> => {
+  const response = await axios.post('/login', loginCredentials);
+
+  console.log('response', response.data);
+
   return response.data;
 };
 
 export default function LoginForm() {
+  const login = useAuth((state) => state.login);
+  // const [state, action] = useAuth();
+
   let location = useLocation();
   let params = new URLSearchParams(location.search);
   let from = params.get('from') || '/';
 
   let isLoggingIn = false;
 
-  const mutation: UseMutationResult<LoginResponse, AxiosError<LoginError>> = useMutation({
+  const mutation: UseMutationResult<
+    LoginRequestResponse,
+    AxiosError<LoginRequestError>,
+    LoginRequestCredentials
+  > = useMutation({
     mutationFn: loginUser,
     onError: (error) => {
       if (error.response) {
@@ -37,10 +52,19 @@ export default function LoginForm() {
         console.error('An unexpected error occurred:', error);
       }
     },
-    onSuccess: () => {
-      console.log('success');
+    onSuccess: (res) => {
+      login({ email: 'test@gmail.comm', password: '123123123' });
     },
   });
+
+  const handleLogin = () => {
+    const loginData: LoginRequestCredentials = {
+      email: 'test@gmail.comm',
+      password: '123123123123',
+    };
+
+    mutation.mutate(loginData);
+  };
 
   return (
     <div>
@@ -58,13 +82,10 @@ export default function LoginForm() {
 
       <br />
 
-      <button type="submit" disabled={isLoggingIn}>
+      <button onClick={handleLogin} type="submit" disabled={isLoggingIn}>
         {isLoggingIn ? 'Logging in...' : 'Login'}
       </button>
 
-      <br />
-
-      <button onClick={() => mutation.mutate()}>testing</button>
     </div>
   );
 }

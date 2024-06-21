@@ -3,7 +3,7 @@ import '../css/app.css';
 
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
-import { Sample } from './Components/SampleComponent';
+import { SampleAPICall } from './Components/SampleComponent';
 
 import { useAuth } from './Hooks/useAuth';
 
@@ -30,20 +30,22 @@ const router = createBrowserRouter([
     id: 'root',
     path: '/',
     loader() {
-      // Our root route always provides the user, if logged in
-      return { user: fakeAuthProvider.username };
+      const isAuthenticated  = useAuth.getState().isAuthenticated;
+      
+      if (!isAuthenticated) {
+        return redirect('/login');
+      }
+
+      const user = useAuth.getState().fetchUser();
+      console.log('user from root', user);
+      
+      return null
     },
-    Component: Layout,
+    Component: AuthenticatedLayout,
     children: [
       {
         index: true,
         Component: PublicPage,
-      },
-      {
-        path: 'login',
-        // action: loginAction,
-        // loader: loginLoader,
-        Component: LoginForm,
       },
       {
         path: 'protected',
@@ -55,10 +57,28 @@ const router = createBrowserRouter([
   {
     path: '/logout',
     async action() {
-      // We signout in a "resource route" that we can hit from a fetcher.Form
+      // We sign out in a "resource route" that we can hit from a fetcher.Form
       await fakeAuthProvider.signout();
       return redirect('/');
     },
+  },
+  {
+    path: '/login',
+    loader() {
+      const isAuthenticated  = useAuth.getState().isAuthenticated;
+      
+      if (isAuthenticated) {
+        return redirect('/');
+      }
+
+      return null;
+    },
+    Component: LoginForm,
+  },
+  {
+    path: 'testing123',
+    // loader: protectedLoader,
+    Component: SampleAPICall,
   },
 ]);
 
@@ -68,49 +88,11 @@ export default function App() {
   );
 }
 
-function Layout() {
-  return (
-    <div>
-      <h1>Auth Example using RouterProvider</h1>
-
-      <p>
-        This example demonstrates a simple login flow with three pages: a public
-        page, a protected page, and a login page. In order to see the protected
-        page, you must first login. Pretty standard stuff.
-      </p>
-
-      <p>
-        First, visit the public page. Then, visit the protected page. You're not
-        yet logged in, so you are redirected to the login page. After you login,
-        you are redirected back to the protected page.
-      </p>
-
-      <p>
-        Notice the URL change each time. If you click the back button at this
-        point, would you expect to go back to the login page? No! You're already
-        logged in. Try it out, and you'll see you go back to the page you
-        visited just *before* logging in, the public page.
-      </p>
-
-      <AuthStatus />
-
-      <ul>
-        <li>
-          <Link to="/">Public Page</Link>
-        </li>
-        <li>
-          <Link to="/protected">Protected Page</Link>
-        </li>
-      </ul>
-
-      <Outlet />
-    </div>
-  );
-}
-
 function AuthStatus() {
   // Get our logged in user, if they exist, from the root route loader data
-  let { user } = useRouteLoaderData('root') as { user: string | null };
+  const user = useAuth((state) => state.user);
+
+  // let { user } = useRouteLoaderData('root') as { user: string | null };
   let fetcher = useFetcher();
 
   if (!user) {
@@ -121,7 +103,7 @@ function AuthStatus() {
 
   return (
     <div>
-      <p>Welcome {user}!</p>
+      <p>Welcome {user.name}!</p>
       <fetcher.Form method="post" action="/logout">
         <button type="submit" disabled={isLoggingOut}>
           {isLoggingOut ? 'Signing out...' : 'Sign out'}
@@ -167,6 +149,9 @@ async function loginLoader() {
   return null;
 }
 
+// async function loginAction({ request }: LoaderFunctionArgs) {
+
+// }
 // function LoginPage() {
 //   let location = useLocation();
 //   let params = new URLSearchParams(location.search);
@@ -205,7 +190,9 @@ function protectedLoader({ request }: LoaderFunctionArgs) {
   // If the user is not logged in and tries to access `/protected`, we redirect
   // them to `/login` with a `from` parameter that allows login to redirect back
   // to this page upon successful authentication
-  if (!fakeAuthProvider.isAuthenticated) {
+  const isAuthenticated  = useAuth.getState().isAuthenticated;
+
+  if (!isAuthenticated ) {
     let params = new URLSearchParams();
     params.set('from', new URL(request.url).pathname);
     return redirect('/login?' + params.toString());
@@ -226,6 +213,8 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import LoginForm from './Components/Auth/LoginForm';
+import { AuthenticatedLayout } from './Layouts/AuthenticatedLayout';
+import { GuestLayout } from './Layouts/GuestLayout';
 
 const queryClient = new QueryClient();
 

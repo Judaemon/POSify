@@ -13,8 +13,10 @@
         <!-- Scripts -->
         @viteReactRefresh
         @vite(['resources/js/app.tsx'])
+        
     </head>
     <body class="font-sans antialiased">
+        <div class="hidden">{{ $test }}</div>
         <div id="root"></div>
     </body>
 </html>

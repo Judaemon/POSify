@@ -1,41 +1,52 @@
-import { Action, createHook, createStore } from 'react-sweet-state';
-
 type User = {
   id: number;
   name: string;
   email: string;
 };
 
-type State = {
+type LoginRequest = {
+  email: string;
+  password: string;
+};
+
+import { create } from 'zustand';
+import { createSelectors } from '@/bootstrap';
+import axios from 'axios';
+
+interface AuthState {
+  isAuthenticated: Boolean;
   user: User | null;
-};
+  login: (loginRequest: LoginRequest) => void;
+  logout: () => void;
+  fetchUser: () => void;
+}
 
-type Actions = typeof actions;
-
-const initialState: State = {
+export const useAuth = create<AuthState>((set) => ({
+  isAuthenticated: false,
   user: null,
-};
+  login: () => {
+    console.log('login');
+    // set({ user: LoginRequest})
+    const user = {
+      id: 1,
+      name: 'John Doe',
+      email: 'test@gmail.comm',
+    };
 
-const actions = {
-  login:
-    (): Action<State> =>
-    ({ setState, getState }) => {
-      setState({
-        user: { id: 1, name: 'test', email: 'test@gmail.com' },
-      });
-    },
-  logout:
-    (): Action<State> =>
-    ({ setState, getState }) => {
-      setState({
-        user: null,
-      });
-    },
-};
+    set({ user });
 
-const Store = createStore<State, Actions>({
-  initialState,
-  actions,
-});
+    return user;
+  },
+  logout: () => set({ user: null }),
+  fetchUser: async () => {
+    const response = await axios.get('/users/authenticated').then((res) => {
+      const user: User = res.data;
 
-export const useAuth = createHook(Store);
+      console.log('user', user);
+      
+      set({ user });
+    });
+  },
+}));
+
+export const useAuthSelector = createSelectors(useAuth);

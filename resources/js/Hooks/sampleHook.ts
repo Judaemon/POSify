@@ -1,26 +1,15 @@
-import { Action, createStore, createHook } from 'react-sweet-state';
+import { create } from 'zustand';
 
-type State = { count: number };
-type Actions = typeof actions;
+interface BearState {
+  bears: number;
+  increasePopulation: (by?: number) => void;
+  removeAllBears: () => void;
+  updateBears: (newBears: number) => void;
+}
 
-const initialState: State = {
-  count: 0,
-};
-
-const actions = {
-  increment:
-    (by = 1): Action<State> =>
-    ({ setState, getState }) => {
-      setState({
-        count: getState().count + by,
-      });
-    },
-};
-
-// Note: most times TS will be able to infer the generics
-const Store = createStore<State, Actions>({
-  initialState,
-  actions,
-});
-
-export const useCounter = createHook(Store);
+export const useBearStore = create<BearState>()((set) => ({
+  bears: 0,
+  increasePopulation: (by = 1) => set((state) => ({ bears: state.bears + by })),
+  removeAllBears: () => set({ bears: 0 }),
+  updateBears: (newBears) => set({ bears: newBears }),
+}));

@@ -1,4 +1,5 @@
 import { useBearStore } from '@/Hooks/sampleHook';
+import { useAuth } from '@/Hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
@@ -21,7 +22,7 @@ export const SampleUsers = () => {
     queryFn: () => axios.get('/test').then((res) => res.data),
   });
 
-  // if (isFetching) return 'Fetching...';
+  if (isFetching) return 'Fetching...';
 
   if (isPending) return 'Loading...';
 
@@ -63,4 +64,16 @@ export const SampleAPICall = () => {
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>
   );
+};
+
+export const SampleAuth = () => {
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const user = useAuth((state) => state.user);
+
+  {user && (
+    <div>
+      <h1>Authenticated user</h1>
+      <p>Name: {user.name}</p>
+    </div>
+  )}
 };

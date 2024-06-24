@@ -1,10 +1,8 @@
-import {
-  UseMutationResult,
-  useMutation,
-} from '@tanstack/react-query';
+import { UseMutationResult, useMutation } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 import { useLocation } from 'react-router';
 import { useAuth } from '@/Hooks/useAuth';
+import { Button } from '../ui/button';
 
 type LoginRequestResponse = {
   message: string;
@@ -82,10 +80,9 @@ export default function LoginForm() {
 
       <br />
 
-      <button onClick={handleLogin} type="submit" disabled={isLoggingIn}>
+      <Button onClick={handleLogin} type="submit" disabled={isLoggingIn}>
         {isLoggingIn ? 'Logging in...' : 'Login'}
-      </button>
-
+      </Button>
     </div>
   );
 }

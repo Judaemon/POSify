@@ -17,13 +17,13 @@ Route::middleware(['localOnly'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/users/authenticated', function () {
         return auth()->user();
-    });
+    })->name('authenticated-user');
 });
 
 Route::get('/{any?}', function () {
-    $test = "test from back end initial load";
+    $isAuthenticated = auth()->check();
 
     return view('app', [
-        'test' => $test
+        'isAuthenticated' => $isAuthenticated,
     ]);
-});
+})->name('app');

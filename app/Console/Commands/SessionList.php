@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-class ListSessions extends Command
+class SessionList extends Command
 {
     /**
      * The name and signature of the console command.

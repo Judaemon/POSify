@@ -16,12 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        $middleware->redirectGuestsTo('/');
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'localOnly' => \App\Http\Middleware\LocalOnly::class,
         ]);
-
-        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

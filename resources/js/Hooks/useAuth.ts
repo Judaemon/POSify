@@ -10,22 +10,32 @@ type LoginRequest = {
 };
 
 import { create } from 'zustand';
-import { createSelectors } from '@/bootstrap';
 import axios from 'axios';
+import { toast } from '@/Components/ui/use-toast';
+import { redirect, useNavigate } from 'react-router-dom';
 
 interface AuthState {
-  isAuthenticated: Boolean;
+  isAuthenticated: boolean;
   user: User | null;
   login: (loginRequest: LoginRequest) => void;
+  setIsAuthenticated: (isAuthenticated: boolean) => void,
+  fetchUser: () => Promise<User | null>;
   logout: () => void;
-  fetchUser: () => void;
 }
+
+const authInitialState: AuthState = {
+  isAuthenticated: false,
+  user: null,
+  login: () => {},
+  setIsAuthenticated: () => {},
+  fetchUser: async () => null,
+  logout: () => {},
+};
 
 export const useAuth = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
   login: () => {
-    console.log('login');
     // set({ user: LoginRequest})
     const user = {
       id: 1,
@@ -33,20 +43,29 @@ export const useAuth = create<AuthState>((set) => ({
       email: 'test@gmail.comm',
     };
 
-    set({ user });
-
+    set({ user, isAuthenticated: true });
+    console.log("login testing");
+    
     return user;
   },
-  logout: () => set({ user: null }),
-  fetchUser: async () => {
-    const response = await axios.get('/users/authenticated').then((res) => {
-      const user: User = res.data;
+  setIsAuthenticated: (isAuthenticated) => {
+    set({ isAuthenticated });
+  },
+  fetchUser: async (): Promise<User | null> => {
+    return axios
+      .get('/users/authenticated')
+      .then((response) => {
+        const user: User = response.data;
 
-      console.log('user', user);
-      
-      set({ user });
-    });
+        set({ user, isAuthenticated: true });
+
+        return user;
+      })
+      .catch((error) => {
+        return null;
+      });
+  },
+  logout: () => {
+    set(authInitialState);
   },
 }));
-
-export const useAuthSelector = createSelectors(useAuth);

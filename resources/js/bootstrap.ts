@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { redirect } from 'react-router-dom';
+import { useAuth } from './Hooks/useAuth';
+import { toast } from './Components/ui/use-toast';
 
 declare global {
   interface Window {
@@ -11,38 +12,22 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// End of axios setup
-
-import { StoreApi, UseBoundStore } from 'zustand';
-
-type WithSelectors<S> = S extends { getState: () => infer T }
-  ? S & { use: { [K in keyof T]: () => T[K] } }
-  : never;
-
-export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
-  _store: S
-) => {
-  let store = _store as WithSelectors<typeof _store>;
-  store.use = {};
-  for (let k of Object.keys(store.getState())) {
-    (store.use as any)[k] = () => store((s) => s[k as keyof typeof s]);
-  }
-
-  return store;
-};
-
-// End of zustand setup
-
 window.axios.interceptors.response.use(
   (response) => response,
   (error) => {
     switch (error.response.status) {
       case 401: // Not logged in
-        console.log('Not logged in');
-        redirect('/login');
 
-        Promise.reject(error);
+        toast({
+          variant: 'destructive',
+          title: 'Error: 401 Unauthorized',
+          description: 'You are not logged in.  Please log in to continue.',
+        })
 
+        useAuth.getState().logout();
+
+        return null        
+        // return Promise.reject(error);
         break;
       case 419: // Session expired
         // Bounce the user to the login screen with a redirect back
@@ -63,4 +48,6 @@ window.axios.interceptors.response.use(
         return Promise.reject(error);
     }
   }
+
+  // End of axios setup
 );

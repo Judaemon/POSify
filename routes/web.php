@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/{any?}', function () {
     $isAuthenticated = auth()->check();
+    // $isAuthenticated = true;
 
     return view('app', [
         'isAuthenticated' => $isAuthenticated,

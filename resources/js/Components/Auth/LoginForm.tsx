@@ -1,88 +1,87 @@
-import { UseMutationResult, useMutation } from '@tanstack/react-query';
-import axios, { AxiosError } from 'axios';
-import { useLocation } from 'react-router';
-import { useAuth } from '@/Hooks/useAuth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form';
+import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 
-type LoginRequestResponse = {
-  message: string;
-};
+const loginFormSchema = z.object({
+  email: z.string().email().min(2, {
+    message: 'Email must be at least 2 characters.',
+  }),
+  password: z.string().min(6, {
+    message: 'Password must be at least 6 characters.',
+  }),
+});
 
-type LoginRequestError = {
-  message: string;
-};
-
-interface LoginRequestCredentials {
-  email: string;
-  password: string;
-}
-
-const loginUser = async (
-  loginCredentials: LoginRequestCredentials
-): Promise<LoginRequestResponse> => {
-  const response = await axios.post('/login', loginCredentials);
-
-  console.log('response', response.data);
-
-  return response.data;
-};
-
-export default function LoginForm() {
-  const login = useAuth((state) => state.login);
-  // const [state, action] = useAuth();
-
-  let location = useLocation();
-  let params = new URLSearchParams(location.search);
-  let from = params.get('from') || '/';
-
-  let isLoggingIn = false;
-
-  const mutation: UseMutationResult<
-    LoginRequestResponse,
-    AxiosError<LoginRequestError>,
-    LoginRequestCredentials
-  > = useMutation({
-    mutationFn: loginUser,
-    onError: (error) => {
-      if (error.response) {
-        console.log('error', error.response.data);
-      } else {
-        console.error('An unexpected error occurred:', error);
-      }
-    },
-    onSuccess: (res) => {
-      login({ email: 'test@gmail.comm', password: '123123123' });
+export function LoginForm() {
+  const form = useForm<z.infer<typeof loginFormSchema>>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
     },
   });
 
-  const handleLogin = () => {
-    const loginData: LoginRequestCredentials = {
-      email: 'test@gmail.comm',
-      password: '123123123123',
-    };
+  const mutation = useMutation({
+    mutationFn: (loginCredentials: z.infer<typeof loginFormSchema>) => {
+      return axios.post('/login', loginCredentials);
+    },
+    onSuccess: () => {
+      // Redirect to the dashboard
+    },
+    onError: (error) => {
+      console.log(error.response);
+    },
+  });
 
-    mutation.mutate(loginData);
-  };
+  // 2. Define a submit handler.
+  function onSubmit(values: z.infer<typeof loginFormSchema>) {
+    mutation.mutate(values);
+  }
 
   return (
-    <div>
-      <p>You must log in to view the page at {from}</p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <label>
-        Username: <input name="username" />
-      </label>
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input placeholder="Password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <br />
-
-      <label>
-        Password: <input name="username" />
-      </label>
-
-      <br />
-
-      <Button onClick={handleLogin} type="submit" disabled={isLoggingIn}>
-        {isLoggingIn ? 'Logging in...' : 'Login'}
-      </Button>
-    </div>
+        <Button type="submit">Login</Button>
+      </form>
+    </Form>
   );
 }

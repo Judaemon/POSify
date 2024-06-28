@@ -29,8 +29,10 @@ export const SampleUsers = () => {
   if (error) return 'An error has occurred: ' + error.message;
 
   return (
-    <div>
-      <h1>Users</h1>
+    <div className="mt-2 p-2 bg-slate-900 text-white">
+      <h1>Sample Component</h1>
+      <h2>Users</h2>
+      <hr />
       <ul>
         {data.map((user: any) => (
           <li key={user.id} className="flex space-x-2">
@@ -49,7 +51,6 @@ export const SampleAPICall = () => {
     queryKey: ['sample'],
     queryFn: () =>
       axios.get('/test123').then((res) => {
-        console.log('res', res);
         return res.data;
       }),
   });
@@ -68,12 +69,18 @@ export const SampleAPICall = () => {
 
 export const SampleAuth = () => {
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
-  const user = useAuth((state) => state.user);
+  const user = useAuth().user;
 
-  {user && (
+  return (
     <div>
-      <h1>Authenticated user</h1>
-      <p>Name: {user.name}</p>
+      <h1>Sample Auth fetched</h1>
+      
+      {user && (
+        <div>
+          <h1>Authenticated user</h1>
+          <p>Name: {user.name}</p>
+        </div>
+      )}
     </div>
-  )}
+  );
 };

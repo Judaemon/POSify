@@ -1,10 +1,12 @@
-import { Sample, SampleUsers } from '@/Components/SampleComponent';
-import { useAuth, useAuthSelector } from '@/Hooks/useAuth';
+import { Sample, SampleAuth, SampleUsers } from '@/Components/SampleComponent';
+import { Button } from '@/Components/ui/button';
+import { toast } from '@/Components/ui/use-toast';
+import { useAuth } from '@/Hooks/useAuth';
 import { Link, Outlet } from 'react-router-dom';
 
 export const AuthenticatedLayout: React.FC = () => {
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
-  const user = useAuth((state) => state.user);
+  // const user = useAuth((state) => state.user);
 
   return (
     <div>
@@ -29,16 +31,23 @@ export const AuthenticatedLayout: React.FC = () => {
         
         <div>
           <SampleUsers />
+
+          <SampleAuth />
+
+          <Button onClick={() => toast({
+            title: 'Hello',
+            description: 'This is a test',
+          })}>Test: {isAuthenticated }</Button>
         </div>
 
-        {user && (
+        {/* {user && (
           <div className='mt-48'>
             <h1>Authenticated user</h1>
             <p>id: {user.id}</p>
             <p>Name: {user.name}</p>
             <p>email: {user.email}</p>
           </div>
-        )}
+        )} */}
       </main>
     </div>
   );

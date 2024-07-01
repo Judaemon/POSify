@@ -10,6 +10,8 @@ import { Link, Outlet, createBrowserRouter, redirect } from 'react-router-dom';
 import { useAuth } from './Hooks/useAuth';
 import { checkAuthentication } from './helpers/authHelper';
 import { LoginForm } from './Components/Auth/LoginForm';
+import GroupsPage from './Pages/Groups';
+import { AuthenticatedLayout } from './Layouts/AuthenticatedLayout';
 
 // export const router = createBrowserRouter([
 //   {
@@ -178,7 +180,7 @@ export const router = createBrowserRouter([
     id: 'root',
     path: '/',
     loader: protectedLoader,
-    Component: Layout,
+    Component: AuthenticatedLayout,
     children: [
       {
         index: true,
@@ -187,6 +189,10 @@ export const router = createBrowserRouter([
       {
         path: 'protected',
         Component: ProtectedPage,
+      },
+      {
+        path: 'groups',
+        Component: GroupsPage,
       },
     ],
   },

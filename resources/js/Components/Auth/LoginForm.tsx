@@ -13,6 +13,9 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
+import { handleErrorValidationFromBackend } from '@/helpers/validationHelper';
+import { useAuth } from '@/Hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const loginFormSchema = z.object({
   email: z.string().email().min(2, {
@@ -24,6 +27,8 @@ const loginFormSchema = z.object({
 });
 
 export function LoginForm() {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -36,11 +41,13 @@ export function LoginForm() {
     mutationFn: (loginCredentials: z.infer<typeof loginFormSchema>) => {
       return axios.post('/login', loginCredentials);
     },
-    onSuccess: () => {
-      // Redirect to the dashboard
+    onSuccess: (res) => {
+      useAuth.getState().setUser(res.data);
+      navigate('/');
+      console.log('Login success', res.data);
     },
-    onError: (error) => {
-      console.log(error.response);
+    onError: (error: any) => {
+      handleErrorValidationFromBackend(error.response.data.errors, form);
     },
   });
 

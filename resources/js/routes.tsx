@@ -103,13 +103,20 @@ const Layout = () => {
 };
 
 const AuthStatus = () => {
+  const user = useAuth.getState().user;
+  const isAuthenticated = useAuth.getState().isAuthenticated;
+
+  if (!user) {
+    return <p>Not authenticated in frontend</p>;
+  }
+
   return (
     <div className="pl-4">
       <h1 className="my-2">Auth status</h1>
 
       <div className="my-2 bg-black text-white">
-        <p>Authenticated: true</p>
-        <p>User: John Doe</p>
+        <p>Authenticated: {isAuthenticated ? "True" : "False"}</p>
+        <p>User: {user.name}</p>
       </div>
     </div>
   );
@@ -123,10 +130,9 @@ const PublicPage = () => {
   );
 };
 
-const protectedLoader = ({ request }: LoaderFunctionArgs) => {
+const protectedLoader = async ({ request }: LoaderFunctionArgs) => {
   const isAuthenticated =
     useAuth.getState().isAuthenticated || checkAuthentication();
-  console.log('protected loader auth', isAuthenticated);
 
   if (!isAuthenticated) {
     let params = new URLSearchParams();
@@ -134,7 +140,7 @@ const protectedLoader = ({ request }: LoaderFunctionArgs) => {
     return redirect('/login?' + params.toString());
   }
 
-  return null;
+  return await useAuth.getState().fetchUser();
 };
 
 const ProtectedPage = () => {

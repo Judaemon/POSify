@@ -17,7 +17,6 @@ window.axios.interceptors.response.use(
   (error) => {
     switch (error.response.status) {
       case 401: // Not logged in
-
         toast({
           variant: 'destructive',
           title: 'Error: 401 Unauthorized',
@@ -25,6 +24,8 @@ window.axios.interceptors.response.use(
         })
 
         useAuth.getState().logout();
+
+        window.location.href = "/";
 
         return null        
         // return Promise.reject(error);
@@ -41,7 +42,12 @@ window.axios.interceptors.response.use(
         // window.location.reload();
         break;
       case 500:
-        alert('Oops, something went wrong!  The team have been notified.');
+        // shows error message from server
+        toast({
+          title: 'Server Error',
+          description: error.response.data.message,
+          variant: 'destructive',
+        });
         break;
       default:
         // Allow individual requests to handle other errors

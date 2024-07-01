@@ -4,21 +4,16 @@ type User = {
   email: string;
 };
 
-type LoginRequest = {
-  email: string;
-  password: string;
-};
-
 import { create } from 'zustand';
 import axios from 'axios';
 import { toast } from '@/Components/ui/use-toast';
 import { redirect, useNavigate } from 'react-router-dom';
 
 interface AuthState {
-  isAuthenticated: boolean;
   user: User | null;
-  login: (loginRequest: LoginRequest) => void;
-  setIsAuthenticated: (isAuthenticated: boolean) => void,
+  isAuthenticated: boolean;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+  setUser: (user: User) => void;
   fetchUser: () => Promise<User | null>;
   logout: () => void;
 }
@@ -26,7 +21,7 @@ interface AuthState {
 const authInitialState: AuthState = {
   isAuthenticated: false,
   user: null,
-  login: () => {},
+  setUser: () => {},
   setIsAuthenticated: () => {},
   fetchUser: async () => null,
   logout: () => {},
@@ -35,17 +30,10 @@ const authInitialState: AuthState = {
 export const useAuth = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
-  login: () => {
-    // set({ user: LoginRequest})
-    const user = {
-      id: 1,
-      name: 'John Doe',
-      email: 'test@gmail.comm',
-    };
-
+  setUser: (user) => {
+    console.log('set user from useAuth', user);
     set({ user, isAuthenticated: true });
-    console.log("login testing");
-    
+
     return user;
   },
   setIsAuthenticated: (isAuthenticated) => {
@@ -62,6 +50,12 @@ export const useAuth = create<AuthState>((set) => ({
         return user;
       })
       .catch((error) => {
+        toast({
+          title: 'Failed to Fetch User Data',
+          description: 
+            'There was an error while retrieving user data. Please try again. ',
+          variant: 'destructive',
+        });
         return null;
       });
   },

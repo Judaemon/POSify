@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
+        // Teams
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // create a table for pivot table for user and team
+        // Pivot table for team and user
         Schema::create('team_user', function (Blueprint $table) {
             $table->foreignId('team_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
